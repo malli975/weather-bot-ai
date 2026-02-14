@@ -56,13 +56,21 @@ class ForecastInput(BaseModel):
 templates = Jinja2Templates(directory="templates")
 
 @app.get("/", response_class=HTMLResponse)
-def home_ui(request: Request, city: str = "Hyderabad"): # Default to Hyderabad
+def home_ui(request: Request, city: str = "Hyderabad"):
     try:
         url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric"
-        data = requests.get(url).json()
+        response = requests.get(url)
+        data = response.json()
         
-        if "main" not in data:
-            return HTMLResponse(content=f"<html><body><h1>City '{city}' not found!</h1><a href='/'>Go Back</a></body></html>")
+        # FIX: Instead of a white screen, send the error to index.html
+        if response.status_code != 200:
+            return templates.TemplateResponse("index.html", {
+                "request": request,
+                "city_name": "Not Found",
+                "live_temp": "--", 
+                "forecast": "--",
+                "error_msg": f"City '{city}' not found. Check the spelling!"
+            })
             
         live_temp = data["main"]["temp"]
         prediction = model.predict([[live_temp]]) 
@@ -72,10 +80,17 @@ def home_ui(request: Request, city: str = "Hyderabad"): # Default to Hyderabad
             "request": request, 
             "city_name": city,
             "live_temp": live_temp, 
-            "forecast": forecast
+            "forecast": forecast,
+            "error_msg": None 
         })
     except Exception as e:
-        return HTMLResponse(content=f"<html><body><h1>Error: {str(e)}</h1></body></html>")
+        return templates.TemplateResponse("index.html", {
+            "request": request,
+            "city_name": "System Error",
+            "live_temp": "Error", 
+            "forecast": "Error",
+            "error_msg": "Weather service is currently unavailable."
+        })
 @app.post("/predict")
 def predict(data: ForecastInput):
     # FIX: Feed only ONE number
@@ -177,7 +192,7 @@ def smart_predict():
         return {"error": f"Weather service error: {weather_data.get('message', 'Unknown')}"}
     
     current_temp = weather_data["main"]["temp"]
-    prediction = model.predict([[current_temp, current_temp]])
+    prediction = model.predict([[current_temp]])
     forecast = round(float(prediction[0]), 2)
     
     return {
