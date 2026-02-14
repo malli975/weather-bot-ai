@@ -24,6 +24,11 @@
             <div class="col-md-8">
                 <div class="weather-card p-4 text-center">
                     <h2 class="mb-4">{{ city_name if city_name else "Hyderabad" }} Weather AI</h2>
+                    {% if error_msg %}
+    <div class="alert alert-danger mb-3" role="alert">
+        {{ error_msg }}
+    </div>
+    {% endif %}
                     
                     <form action="/" method="get" class="mb-4">
                         <div class="input-group">
