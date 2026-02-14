@@ -1,0 +1,6 @@
+Input: 45.0C | Forecast: 46.0C | Tip: It's hot!
+Input: 33.0C | Forecast: 34.0C | Tip: It's hot!
+Input: 0.0C | Forecast: 1.0C | Tip: It's pleasant.
+Input: 23.0C | Forecast: 24.0C | Tip: It's pleasant.
+Input: 23.0C | Forecast: 24.0C | Tip: It's pleasant.
+Input: 15.0C | Forecast: 16.0C | Tip: It's pleasant.
